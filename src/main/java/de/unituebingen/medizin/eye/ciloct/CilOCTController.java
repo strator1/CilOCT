@@ -183,7 +183,7 @@ import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 
 public class CilOCTController implements Initializable {
-	private static final boolean SHOW_CNN_RIBBONGROUP				= false;
+	private static final boolean SHOW_CNN_RIBBONGROUP				= true;
 	private static final boolean USE_ANGLES							= false;
 
 	private static final Cursor REMOVE_LANDMARK_CURSOR				= FontAwesomeCursor
@@ -274,8 +274,12 @@ public class CilOCTController implements Initializable {
 
 	private final OptionalObjectProperty<Point> _lensStartPoint = new OptionalObjectProperty<>();
 	private final OptionalObjectProperty<PointList> _lensPoints = new OptionalObjectProperty();
+	private final OptionalObjectProperty<PointList> _upperLensBorderGradients = new OptionalObjectProperty<>();
+	private final OptionalObjectProperty<PointList> _lowerLensBorderGradients = new OptionalObjectProperty<>();
 	private final OptionalObjectProperty<IBoundedFunction> _upperLensFit = new OptionalObjectProperty<>();
 	private final OptionalObjectProperty<IBoundedFunction> _lowerLensFit = new OptionalObjectProperty<>();
+
+	private final OptionalObjectProperty<PointList> _airPoints = new OptionalObjectProperty();
 
 	private final OptionalObjectProperty<Point> _anteriorChamberStartPoint = new OptionalObjectProperty<>();
 	private final OptionalObjectProperty<PointList> _anteriorChamberPoints = new OptionalObjectProperty();
@@ -1154,6 +1158,8 @@ public class CilOCTController implements Initializable {
 								call(CilOCTController.this::fitConjunctivaBorder).ifPresent(exceptions::add);
 								updateTitle("fit vertical ciliary muscle border");
 								call(CilOCTController.this::fitVerticalCiliaryMuscleBorder).ifPresent(exceptions::add);
+								updateTitle("fit lens borders");
+								call(CilOCTController.this::fitLensBorders).ifPresent(exceptions::add);
 
 								runAndWait(() -> _segmented.setValue(true));
 
@@ -1183,6 +1189,20 @@ public class CilOCTController implements Initializable {
 
 								final IndexColorModel colorModel = new IndexColorModel(8, GroundTruthPalette.values().length, GroundTruthPalette.toArray(), 0, false, 0, DataBuffer.TYPE_BYTE);
 								final BufferedImage image = new BufferedImage((int) Math.round(_width.get() * EXPORT_SCALE), (int) Math.round(_height.get() * EXPORT_SCALE), BufferedImage.TYPE_BYTE_INDEXED, colorModel);
+
+								updateTitle("air area");
+								_airPoints.ifPresent(pl -> pl.forEach(p ->{
+									final int x = (int) Math.round(p.getRoundedX() * EXPORT_SCALE);
+									final int y = (int) Math.round(p.getRoundedY() * EXPORT_SCALE);
+									image.setRGB(x, y, GroundTruthPalette.AIR_AREA.rgba());
+								}));
+
+								updateTitle("anterior chamber area");
+								_anteriorChamberPoints.ifPresent(pl -> pl.forEach(p ->{
+									final int x = (int) Math.round(p.getRoundedX() * EXPORT_SCALE);
+									final int y = (int) Math.round(p.getRoundedY() * EXPORT_SCALE);
+									image.setRGB(x, y, GroundTruthPalette.ANTERIOR_CHAMBER_AREA.rgba());
+								}));
 
 								updateTitle("ciliary muscle area");
 								_outerCiliaryMuscleBorderFit.andPresent(_innerCiliaryMuscleBorderFit, (outer, inner) -> {
@@ -1293,6 +1313,24 @@ public class CilOCTController implements Initializable {
 									;
 									for (double x = fvertical.getX1(); x < fvertical.getX2(); x+=0.1) {
 										image.setRGB((int) Math.round(fvertical.value(x) * EXPORT_SCALE), (int) Math.round(x * EXPORT_SCALE), GroundTruthPalette.VERTICAL_CILIARY_MUSCLE_BORDER.rgba());
+									}
+								});
+
+								updateTitle("lens area");
+								_lensPoints.ifPresent(pl -> pl.forEach(p ->{
+									final int x = (int) Math.round(p.getRoundedX() * EXPORT_SCALE);
+									final int y = (int) Math.round(p.getRoundedY() * EXPORT_SCALE);
+									image.setRGB(x, y, GroundTruthPalette.LENS_AREA.rgba());
+								}));
+								updateTitle("lens borders");
+								_lowerLensFit.ifPresent(f -> {
+									for (int x = (int) Math.round(f.getX1()); x < f.getX2(); x++) {
+										image.setRGB((int) Math.round(x * EXPORT_SCALE), (int) Math.round(f.value(x) * EXPORT_SCALE), GroundTruthPalette.LOWER_LENS_BORDER.rgba());
+									}
+								});
+								_upperLensFit.ifPresent(f -> {
+									for (int x = (int) Math.round(f.getX1()); x < f.getX2(); x++) {
+										image.setRGB((int) Math.round(x * EXPORT_SCALE), (int) Math.round(f.value(x) * EXPORT_SCALE), GroundTruthPalette.UPPER_LENS_BORDER.rgba());
 									}
 								});
 
@@ -2270,7 +2308,23 @@ public class CilOCTController implements Initializable {
 
 		_segmentation = segmenter.segment(createImageFromMatrix());
 
+		final IndexColorModel colorModel = new IndexColorModel(8, GroundTruthPalette.values().length, GroundTruthPalette.toArray(), 0, false, 0, DataBuffer.TYPE_BYTE);
+		final BufferedImage image = new BufferedImage((int) Math.round(_width.get() * EXPORT_SCALE), (int) Math.round(_height.get() * EXPORT_SCALE), BufferedImage.TYPE_BYTE_INDEXED, colorModel);
+
+		final double prob = _probability.doubleValue();
+		_segmentation.forEach((c, points) -> points.stream().filter(p -> p.getProbability() > prob).forEach(p -> image.setRGB((int) Math.round(p.getX()*EXPORT_SCALE), (int) Math.round(p.getY()*EXPORT_SCALE), c.rgba())));
+
+		try {
+			ImageIO.write(image, "png", Paths.get("./segmented", _fileProperty.get() + ".png").toFile());
+//			ImageIO.write(flippedImage, "png", Paths.get(targetDir.getAbsolutePath(), path.toFile().getName() + "_r.png").toFile());
+		} catch (IOException ex) {
+			Logger.getLogger(CilOCTController.class.getName()).log(Level.WARNING, null, ex);
+		}
+
+
 		setSegmentation();
+		skeletonize();
+		cluster();
 
 		Platform.runLater(() -> {
 			segmentationCanvasToggleButton.setSelected(false);
@@ -2288,6 +2342,10 @@ public class CilOCTController implements Initializable {
 			_innerSclearalBorderGradients.setActualValue(_segmentation.get(GroundTruthPalette.INNER_SCLERAL_BORDER).stream().filter(p -> p.getProbability() > prob).collect(toCollection(PointList::new)));
 			_upperIrisBorderGradients.setActualValue(_segmentation.get(GroundTruthPalette.UPPER_IRIS_BORDER).stream().filter(p -> p.getProbability() > prob).collect(toCollection(PointList::new)));
 			_verticalCiliaryMuscleBorderGradients.setActualValue(_segmentation.get(GroundTruthPalette.VERTICAL_CILIARY_MUSCLE_BORDER).stream().filter(p -> p.getProbability() > prob).collect(toCollection(PointList::new)));
+			_lowerLensBorderGradients.setActualValue(_segmentation.get(GroundTruthPalette.LOWER_LENS_BORDER).stream().filter(p -> p.getProbability() > prob).collect(toCollection(PointList::new)));
+			_upperLensBorderGradients.setActualValue(_segmentation.get(GroundTruthPalette.UPPER_LENS_BORDER).stream().filter(p -> p.getProbability() > prob).collect(toCollection(PointList::new)));
+			_lensPoints.setActualValue(_segmentation.get(GroundTruthPalette.LENS_AREA).stream().filter(p -> p.getProbability() > prob).collect(toCollection(PointList::new)));
+			_anteriorChamberPoints.setActualValue(_segmentation.get(GroundTruthPalette.ANTERIOR_CHAMBER_AREA).stream().filter(p -> p.getProbability() > prob).collect(toCollection(PointList::new)));
 		}
 	}
 
@@ -2324,6 +2382,10 @@ public class CilOCTController implements Initializable {
 		gradientCanvas.fireEvent(new RepaintEvent(null));
 	}
 
+	private void skeletonize() {
+		skeletonize(new ActionEvent());
+	}
+	
 	private void cluster() {
 		cluster(new ActionEvent());
 	}
@@ -2822,56 +2884,76 @@ public class CilOCTController implements Initializable {
 
 	private void extrapolateOuterConjunctivaBorder() {
 		_outerConjunctivaBorderFit.andPresent(_lensStartPoint, (final BoundedPolynomialSplineFunction outerConjunctivaBorder, final Point lensStart) -> {
-			final RealMatrix matrix = _srcMatrix.getSubMatrix(0, _srcMatrix.getRowDimension()-5, 0, (int) outerConjunctivaBorder.getX2());
+			fitLensBorders();
 
-			final double t = _srcMatrix.getSubMatrix(lensStart.getRoundedY()-1, lensStart.getRoundedY()+1, lensStart.getRoundedX()-1, lensStart.getRoundedX()+1).walkInOptimizedOrder(new DefaultRealMatrixPreservingVisitor() {
-				private double _sum = 0;
-				private double _count = 0;
-
-				@Override
-				public void visit(final int row, final int column, final double value) {
-					_sum += value;
-					_count++;
-				}
-
-				@Override
-				public double end() {
-					return _sum / _count;
-				}
-			});
-			final double t1 = t / _lensThresholdFactor.get();
-			final double t2 = t * _lensThresholdFactor.get();
-
-			final List<Point> points = FloodSelect
-				.select(matrix, lensStart.getRoundedX(), lensStart.getRoundedY(), (x, y) -> matrix.getEntry(y, x) > t1 && matrix.getEntry(y, x) <= t2);
-			_lensPoints.setActualValue(new PointList(points));
-
-
-			if (_lensPoints.isPresent()) {
-				final PointList lowerLensGradients = createGradients(_lensPoints.getActualValue(), maxBy(Point::compareY),  p -> _verticalGradientMatrix.getEntry(p.getRoundedY(), p.getRoundedX()) > 2);
-				final BoundedPolynomialSplineFunction blowerLens = MathUtil.fitPolynomialSpline(lowerLensGradients);
-				final BoundedPolynomialFunction lowerLens = MathUtil.fitTail(3, blowerLens, blowerLens.getX1(), (int) Math.round(blowerLens.getX2()-blowerLens.getX1()));
-				_lowerLensFit.setActualValue(lowerLens);
-
-				final PointList upperLensGradients = createGradients(_lensPoints.getActualValue(), minBy(Point::compareY), p -> _verticalGradientMatrix.getEntry(p.getRoundedY(), p.getRoundedX()) < 2);
-				final BoundedPolynomialSplineFunction upperLens = MathUtil.fitPolynomialSpline(upperLensGradients);
-				_upperLensFit.setActualValue(upperLens);
-
-				final org.apache.commons.math3.analysis.polynomials.PolynomialFunction f2 = lowerLens.polynomialDerivative().polynomialDerivative();
+			if (_lowerLensFit.isPresent() && _upperLensFit.isPresent()) {
+				final org.apache.commons.math3.analysis.polynomials.PolynomialFunction f2 = ((BoundedPolynomialFunction) _lowerLensFit.getActualValue()).polynomialDerivative().polynomialDerivative();
 
 				final PointList pl = new PointList();
-				for (double x = outerConjunctivaBorder.getX1(); x < lowerLens.getX1()-10d; x++) {
+				for (double x = outerConjunctivaBorder.getX1(); x < _lowerLensFit.getActualValue().getX1()-10d; x++) {
 					pl.add(new Point(x, outerConjunctivaBorder.value(x)));
 				}
-				for (double x = lowerLens.getX1(); x < lowerLens.getX2(); x++) {
+				for (double x = _lowerLensFit.getActualValue().getX1(); x < _lowerLensFit.getActualValue().getX2(); x++) {
 					if (f2.value(x) > 0) {
-						pl.add(new Point(x, lowerLens.value(x)));
+						pl.add(new Point(x, _lowerLensFit.getActualValue().value(x)));
 					}
 				}
 				final PolynomialFunction extrapolationFunction = MathUtil.fitTail(3, pl);
 				_outerConjunctivaBorderExtrapolationFit.setActualValue(new BoundedPolynomialFunction(extrapolationFunction.getCoefficients(), outerConjunctivaBorder.getX1(), outerConjunctivaBorder.getX2()));
 			}
 		});
+	}
+
+	private void fitLensBorders() {
+		if (_useAI.get()) {
+				_lowerLensBorderGradients.andPresent(_upperLensBorderGradients, (lowerLensGradients, upperLensGradients) -> {
+					final BoundedPolynomialSplineFunction blowerLens = MathUtil.fitPolynomialSpline(lowerLensGradients);
+					final BoundedPolynomialFunction lowerLens = MathUtil.fitTail(3, blowerLens, blowerLens.getX1(), (int) Math.round(blowerLens.getX2()-blowerLens.getX1()));
+					_lowerLensFit.setActualValue(lowerLens);
+
+					final BoundedPolynomialSplineFunction upperLens = MathUtil.fitPolynomialSpline(upperLensGradients);
+					_upperLensFit.setActualValue(upperLens);
+				});
+		} else {
+			_outerConjunctivaBorderFit.andPresent(_lensStartPoint, (final BoundedPolynomialSplineFunction outerConjunctivaBorder, final Point lensStart) -> {
+				final RealMatrix matrix = _srcMatrix.getSubMatrix(0, _srcMatrix.getRowDimension()-5, 0, (int) outerConjunctivaBorder.getX2());
+
+				final double t = _srcMatrix.getSubMatrix(lensStart.getRoundedY()-1, lensStart.getRoundedY()+1, lensStart.getRoundedX()-1, lensStart.getRoundedX()+1).walkInOptimizedOrder(new DefaultRealMatrixPreservingVisitor() {
+					private double _sum = 0;
+					private double _count = 0;
+
+					@Override
+					public void visit(final int row, final int column, final double value) {
+						_sum += value;
+						_count++;
+					}
+
+					@Override
+					public double end() {
+						return _sum / _count;
+					}
+				});
+				final double t1 = t / _lensThresholdFactor.get();
+				final double t2 = t * _lensThresholdFactor.get();
+
+				final List<Point> points = FloodSelect
+					.select(matrix, lensStart.getRoundedX(), lensStart.getRoundedY(), (x, y) -> matrix.getEntry(y, x) > t1 && matrix.getEntry(y, x) <= t2);
+				_lensPoints.setActualValue(new PointList(points));
+			});
+
+			if (_lensPoints.isPresent()) {
+				final PointList lowerLensGradients = createGradients(_lensPoints.getActualValue(), maxBy(Point::compareY),  p -> _verticalGradientMatrix.getEntry(p.getRoundedY(), p.getRoundedX()) > 2);
+				_lowerLensBorderGradients.setActualValue(lowerLensGradients);
+				final BoundedPolynomialSplineFunction blowerLens = MathUtil.fitPolynomialSpline(lowerLensGradients);
+				final BoundedPolynomialFunction lowerLens = MathUtil.fitTail(3, blowerLens, blowerLens.getX1(), (int) Math.round(blowerLens.getX2()-blowerLens.getX1()));
+				_lowerLensFit.setActualValue(lowerLens);
+
+				final PointList upperLensGradients = createGradients(_lensPoints.getActualValue(), minBy(Point::compareY), p -> _verticalGradientMatrix.getEntry(p.getRoundedY(), p.getRoundedX()) < 2);
+				_upperLensBorderGradients.setActualValue(upperLensGradients);
+				final BoundedPolynomialSplineFunction upperLens = MathUtil.fitPolynomialSpline(upperLensGradients);
+				_upperLensFit.setActualValue(upperLens);
+			}
+		}
 	}
 
 	private void calcThreshold() {
@@ -2916,7 +2998,7 @@ public class CilOCTController implements Initializable {
 				final RealMatrix matrix = _srcMatrix.getSubMatrix(border, _srcMatrix.getRowDimension()-1, _limitLeft, _limitRight);
 				final List<Point> points = FloodSelect
 					.select(matrix, 1, 1, (x, y) -> matrix.getEntry(y, x) <= _startThreshold * _thresholdFactor.get());
-
+				_airPoints.setActualValue(new PointList(points));
 				final PointList pointList =
 					createGradients(points, maxBy(Point::compareY), p -> true)
 						.stream()
@@ -3063,21 +3145,23 @@ public class CilOCTController implements Initializable {
 	}
 
 	private void findAnteriorChamber() throws GradientException {
-		final Point startPoint = _anteriorChamberStartPoint.orElseThrow(() -> new GradientException("Could not determine anterior chamber. No start point placed."));
-		try {
-			//TODO: if using submatrix, the coordinates would have to be corrected!!
-			final RealMatrix matrix = _srcMatrix;//.getSubMatrix(0, _srcMatrix.getRowDimension()-1, _limitLeft, _limitRight);
+		if (!_useAI.get()) {
+			final Point startPoint = _anteriorChamberStartPoint.orElseThrow(() -> new GradientException("Could not determine anterior chamber. No start point placed."));
+			try {
+				//TODO: if using submatrix, the coordinates would have to be corrected!!
+				final RealMatrix matrix = _srcMatrix;//.getSubMatrix(0, _srcMatrix.getRowDimension()-1, _limitLeft, _limitRight);
 
-			_anteriorChamberPoints.setActualValue(
-				FloodSelect
-					.select(matrix, startPoint.getRoundedX(), startPoint.getRoundedY(), (x, y) -> y > 10 && x < _limitRight && y < _limitLower[x] && matrix.getEntry(y, x) < _startThreshold * _thresholdFactor.get())
-					.stream()
-					//.map(p -> new Point(p.getX() + _limitLeft, p.getY()))
-//					.map(p -> new Point(p.getX(), p.getY()))
-					.collect(toCollection(PointList::new))
-			);
-		} catch (OutOfRangeException | NumberIsTooSmallException e) {
-			throw new GradientException("Could not determine anterior chamber.", e);
+				_anteriorChamberPoints.setActualValue(
+					FloodSelect
+						.select(matrix, startPoint.getRoundedX(), startPoint.getRoundedY(), (x, y) -> y > 10 && x < _limitRight && y < _limitLower[x] && matrix.getEntry(y, x) < _startThreshold * _thresholdFactor.get())
+						.stream()
+						//.map(p -> new Point(p.getX() + _limitLeft, p.getY()))
+	//					.map(p -> new Point(p.getX(), p.getY()))
+						.collect(toCollection(PointList::new))
+				);
+			} catch (OutOfRangeException | NumberIsTooSmallException e) {
+				throw new GradientException("Could not determine anterior chamber.", e);
+			}
 		}
 	}
 

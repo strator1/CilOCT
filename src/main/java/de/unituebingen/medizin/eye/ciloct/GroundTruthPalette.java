@@ -13,7 +13,12 @@ public enum GroundTruthPalette {
 	OUTER_CILIARY_MUSCLE_BORDER("outer ciliary muscle border", 0xff0000),
 	INNER_CILIARY_MUSCLE_BORDER("inner ciliary muscle border", 0x00ff00),
 	VERTICAL_CILIARY_MUSCLE_BORDER("vertical ciliary muscle border", 0x0000ff),
-	CILIARY_MUSCLE_AREA("ciliary muscle area", 0xa0a0a0);
+	CILIARY_MUSCLE_AREA("ciliary muscle area", 0xa0a0a0),
+	UPPER_LENS_BORDER("upper lens border", 0xf000f0),
+	LOWER_LENS_BORDER("lower lens border", 0xf0f0f0),
+	LENS_AREA("lens area", 0xa000a0),
+	ANTERIOR_CHAMBER_AREA("anterior chamber area", 0xf0000f),
+	AIR_AREA("air area", 0xfd1d1ff);
 
 	private final static int ALPHA = 0xff000000;
 

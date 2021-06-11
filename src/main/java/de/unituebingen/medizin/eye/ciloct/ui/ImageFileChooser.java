@@ -9,8 +9,8 @@ import javafx.stage.Window;
  * @author strasser
  */
 public class ImageFileChooser {
-	public static final FileChooser.ExtensionFilter EXT_FILTER_DICOM = new FileChooser.ExtensionFilter("DICOM files", "*.dcm");
-	public static final FileChooser.ExtensionFilter EXT_FILTER_IMAGE = new FileChooser.ExtensionFilter("Image files", "*.png", "*.bmp", "*.jpg"); 
+	public static final FileChooser.ExtensionFilter EXT_FILTER_DICOM = new FileChooser.ExtensionFilter("DICOM files", "*.dcm", "*.DCM");
+	public static final FileChooser.ExtensionFilter EXT_FILTER_IMAGE = new FileChooser.ExtensionFilter("Image files", "*.png", "*.bmp", "*.jpg", "*.PNG", "*.BMP", "*.JPG"); 
 
 	public static final String PREF_LAST_DIRECTORY = "lastDirectory";
 	public static final String DEFAULT_DIRECTORY	= ".";

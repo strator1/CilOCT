@@ -17,7 +17,12 @@ public interface ICaffeSegment {
 		GroundTruthPalette.OUTER_CILIARY_MUSCLE_BORDER,
 		GroundTruthPalette.INNER_CILIARY_MUSCLE_BORDER,
 		GroundTruthPalette.VERTICAL_CILIARY_MUSCLE_BORDER,
-		GroundTruthPalette.CILIARY_MUSCLE_AREA
+		GroundTruthPalette.CILIARY_MUSCLE_AREA,
+		GroundTruthPalette.UPPER_LENS_BORDER,
+		GroundTruthPalette.LOWER_LENS_BORDER,
+		GroundTruthPalette.LENS_AREA,
+		GroundTruthPalette.ANTERIOR_CHAMBER_AREA,
+		GroundTruthPalette.AIR_AREA
 	};
 
 	public Map<GroundTruthPalette, List<SegmentationPoint>> segment(final BufferedImage image) throws GradientException;	

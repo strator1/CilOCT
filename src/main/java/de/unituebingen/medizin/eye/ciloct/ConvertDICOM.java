@@ -5,7 +5,6 @@
  */
 package de.unituebingen.medizin.eye.ciloct;
 
-import com.sun.corba.se.spi.ior.Writeable;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;

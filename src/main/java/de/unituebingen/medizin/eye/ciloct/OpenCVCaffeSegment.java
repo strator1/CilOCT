@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.bytedeco.javacpp.Loader;
-import org.bytedeco.javacpp.opencv_java;
+import org.bytedeco.opencv.opencv_java;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
@@ -49,8 +49,10 @@ public class OpenCVCaffeSegment implements ICaffeSegment {
 
 	public final void setUseGPU(final boolean useGPU) {
 		if (useGPU) {
-			_net.setPreferableBackend(Dnn.DNN_BACKEND_OPENCV);
-			_net.setPreferableTarget(Dnn.DNN_TARGET_OPENCL_FP16);			
+//			_net.setPreferableBackend(Dnn.DNN_BACKEND_OPENCV);
+//			_net.setPreferableTarget(Dnn.DNN_TARGET_OPENCL_FP16);			
+			_net.setPreferableBackend(Dnn.DNN_BACKEND_CUDA);
+			_net.setPreferableTarget(Dnn.DNN_TARGET_CUDA_FP16);			
 		} else {
 			_net.setPreferableBackend(Dnn.DNN_BACKEND_DEFAULT);
 			_net.setPreferableTarget(Dnn.DNN_TARGET_CPU);
