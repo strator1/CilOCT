@@ -1,0 +1,73 @@
+.button {
+    -fx-font-weight: bold;
+}
+
+.default-color0.chart-series-line { -fx-stroke: blue; }
+
+#gradientChart .chart-symbol {
+    -fx-background-radius: 1px;
+    -fx-padding: 1px;
+}
+
+#gradientChart .chart-series-line {
+    -fx-stroke-width: 1px;
+    -fx-effect: null;
+}
+
+/*
+.ribbon-group {
+    -fx-min-height: 400px;
+    -fx-max-height: 400px;
+}
+*/
+
+.ribbon-group {
+    -fx-font-size: 0.9em; /* 14 */
+    -fx-padding: 0px 0px 6px 0px;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.ribbon-group .title {
+    -fx-fill: #767676;
+    -fx-padding: 0px 0px 6px 0px;
+}
+
+.ribbon-group .button {
+    -fx-padding: 0 0 0 0;
+    -fx-font-weight: bold;
+    -fx-pref-height: 25px;
+    -fx-pref-width: 120px;
+    -fx-min-height: 25px;
+    -fx-min-width: 120px;
+    -fx-max-height: 25px;
+    -fx-max-width: 120px;
+    -fx-font-size: 1em; /* 12 */
+    -fx-border-color: CONTROLS_ACCENT_COLOR;
+    -fx-border-width: 1 1 1 1;
+}
+
+.ribbon-group .toggle-button {
+    -fx-padding: 0 0 0 0;
+    -fx-font-weight: bold;
+    -fx-pref-height: 25px;
+    -fx-pref-width: 120px;
+    -fx-min-height: 25px;
+    -fx-min-width: 120px;
+    -fx-max-height: 25px;
+    -fx-max-width: 120px;
+    -fx-font-size: 1em; /* 12 */
+    -fx-border-color: derive(CONTROLS_ACCENT_COLOR, +40%);
+    -fx-border-width: 1 1 1 1;
+}
+
+.ribbon-group-content > .column {
+    -fx-padding: 10px 10px 10px 10px;
+    -fx-spacing: 3;
+}
+
+.rootPane {
+    -fx-background-insets: 5;
+    -fx-border-color: gray;
+    -fx-border-style: solid;
+    -fx-border-width: 1;
+}

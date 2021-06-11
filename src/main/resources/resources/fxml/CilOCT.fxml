@@ -1,0 +1,722 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.pixelduke.control.Ribbon?>
+<?import com.pixelduke.control.ribbon.Column?>
+<?import com.pixelduke.control.ribbon.QuickAccessBar?>
+<?import com.pixelduke.control.ribbon.RibbonGroup?>
+<?import com.pixelduke.control.ribbon.RibbonItem?>
+<?import com.pixelduke.control.ribbon.RibbonTab?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import de.jensd.fx.glyphs.materialicons.MaterialIconView?>
+<?import de.jensd.fx.glyphs.octicons.OctIconView?>
+<?import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.collections.ObservableList?>
+<?import java.lang.Integer?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="655.0" prefWidth="1181.0" xmlns="http://javafx.com/javafx/8.0.141" fx:controller="de.unituebingen.medizin.eye.ciloct.CilOCTController" styleClass="rootPane">
+   <children>
+      <BorderPane fx:id="main" depthTest="DISABLE">
+         <top>
+            <Ribbon>
+                <quickAccessBar>
+                    <QuickAccessBar fx:id="quickAccessBar" onMouseClicked="#handleMouseClickQuickAccessBar">
+                        <buttons>
+                            <Button onAction="#loadImage">
+                                <tooltip>
+                                    <Tooltip text="Open image" />
+                                </tooltip>
+                                <graphic>
+                                    <OctIconView glyphName="FILE_BINARY" glyphSize="16" styleClass="icon" />
+                                </graphic>
+                            </Button>
+                            <Button fx:id="loadLandmarksButton" onAction="#loadLandmarks">
+                                <tooltip>
+                                    <Tooltip text="Load landmarks" />
+                                </tooltip>
+                                <graphic>
+                                    <OctIconView glyphName="FILE_CODE" glyphSize="16" styleClass="icon" />
+                                </graphic>                                
+                            </Button>
+                            <Button fx:id="saveLandmarksButton" onAction="#saveLandmarks">
+                                <tooltip>
+                                    <Tooltip text="Save landmarks" />
+                                </tooltip>
+                                <graphic>
+                                    <FontAwesomeIconView glyphName="SAVE" glyphSize="16" styleClass="icon" />
+                                </graphic>                                                                
+                            </Button>
+                            <Button fx:id="toggleLayersButton" onAction="#toggleLayers">
+                                <tooltip>
+                                    <Tooltip text="Toggle all layers" />
+                                </tooltip>
+                                <graphic>
+                                    <FontAwesomeIconView glyphName="LOW_VISION" glyphSize="16" styleClass="icon" />
+                                </graphic>                                                                
+                            </Button>
+                        </buttons>
+                        <rightButtons>
+                            <Button onAction="#minimize">
+                                <graphic>
+                                    <MaterialDesignIconView glyphName="WINDOW_MINIMIZE" glyphSize="16" styleClass="icon" />
+                                </graphic>   
+                            </Button>
+                            <Button onAction="#maximize">
+                                <graphic>
+                                    <MaterialDesignIconView glyphName="WINDOW_MAXIMIZE" glyphSize="16" styleClass="icon" />
+                                </graphic>   
+                            </Button>
+                            <Button onAction="#exit">
+                                <graphic>
+                                    <MaterialDesignIconView glyphName="CLOSE" glyphSize="16" styleClass="icon" />
+                                </graphic>   
+                            </Button>
+                        </rightButtons>
+                    </QuickAccessBar>
+                </quickAccessBar>
+                <tabs>
+                    <RibbonTab text="Home">
+                        <ribbonGroups>
+                            <RibbonGroup>
+                                <title>File</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="openImageButton" onAction="#loadImage" text="Open Image">
+                                                    <graphic>
+                                                        <OctIconView glyphName="FILE_BINARY" glyphSize="16" styleClass="icon" />
+                                                    </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="loadLandmarksButton2" onAction="#loadLandmarks" text="Load landmarks">
+                                                    <graphic>
+                                                        <OctIconView glyphName="FILE_CODE" glyphSize="16" styleClass="icon" />
+                                                    </graphic>   
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="saveLandmarksButton2" onAction="#saveLandmarks" text="Save landmarks">
+                                                    <graphic>
+                                                        <FontAwesomeIconView glyphName="SAVE" glyphSize="16" styleClass="icon" />
+                                                    </graphic>  
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Clipboard</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="copyResultsButton" onAction="#copyResults" text="Copy">
+                                                    <graphic>
+                                                        <FontAwesomeIconView glyphName="COPY" glyphSize="16" styleClass="icon" />
+                                                    </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="clearResultsButton" onAction="#clearResults" text="Clear">
+                                                    <graphic>
+                                                        <OctIconView glyphName="CIRCLE_SLASH" glyphSize="16" styleClass="icon" />
+                                                    </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="copyProfilesButton" onAction="#copyProfiles" text="Copy profiles">
+                                                    <graphic>
+                                                        <MaterialDesignIconView glyphName="CONTENT_DUPLICATE" glyphSize="16" styleClass="icon" />
+                                                    </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                    <Column>
+                                        <RibbonItem label="Use headers">
+                                            <item>
+                                                <CheckBox fx:id="useHeadersCheckBox" />
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Subject</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem label="ID">
+                                            <item>
+                                                <TextField fx:id="patientNameTextField" editable="false" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem label="Eye">
+                                            <item>
+                                                <TextField fx:id="eyeTextField" editable="false" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem label="Anonymize">
+                                            <item>
+                                                <CheckBox fx:id="anonymizeCheckBox" selected="true" />
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Experiment</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem label="Date">
+                                            <item>
+                                                <TextField fx:id="dateTextField" editable="false" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem label="Time">
+                                            <item>
+                                                <TextField fx:id="timeTextField" editable="false" />
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Misc</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="settingsButton" onAction="#showSettings" text="Settings">
+                                                    <graphic>
+                                                        <OctIconView glyphName="SETTINGS" glyphSize="16" styleClass="icon" />
+                                                    </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="aboutButton" onAction="#showAbout" text="About">
+                                                    <graphic>
+                                                        <FontAwesomeIconView glyphName="INFO_CIRCLE" glyphSize="16" styleClass="icon" />
+                                                    </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                        </ribbonGroups>
+                    </RibbonTab>
+                    <RibbonTab text="Segmentation">
+                        <ribbonGroups>
+                            <RibbonGroup>
+                                <title>Layer</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="landmarksCanvasToggleButton" mnemonicParsing="false" selected="true" text="Landmarks" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="gradientCanvasToggleButton" mnemonicParsing="false" text="Gradients" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="segmentationCanvasToggleButton" mnemonicParsing="false" selected="true" text="Segmentation" />
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="poiCanvasToggleButton" mnemonicParsing="false" selected="true" text="POI" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="caliperCanvasToggleButton" mnemonicParsing="false" selected="true" text="Caliper" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="debugCanvasToggleButton" mnemonicParsing="false" text="Debug" />
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Landmarks</title>
+                                <nodes>
+                                    <Column>
+                                        <fx:define>
+                                            <ToggleGroup fx:id="landmarkToggleGroup" />
+                                        </fx:define>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="outerCiliaryMuscleBorderToggleButton" selected="true" toggleGroup="$landmarkToggleGroup">
+                                                   <graphic>
+                                                      <ImageView fitHeight="17.0" fitWidth="43.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../outer_ciliary_border.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </ToggleButton>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="innerCiliaryMuscleBorderToggleButton" toggleGroup="$landmarkToggleGroup">
+                                                   <graphic>
+                                                      <ImageView fitHeight="17.0" fitWidth="43.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../inner_ciliary_border.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </ToggleButton>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="verticalCiliaryMuscleBorderToggleButton" toggleGroup="$landmarkToggleGroup">
+                                                   <graphic>
+                                                      <ImageView fitHeight="17.0" fitWidth="43.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../vertical_ciliary_border.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </ToggleButton>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Process</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="segmentButton" onAction="#segment" text="Segment">
+                                                    <graphic>
+                                                        <MaterialDesignIconView glyphName="NUMERIC_1_BOX_OUTLINE" glyphSize="16" styleClass="icon" />
+                                                    </graphic>   
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="correctButton" onAction="#correct" text="Correct">
+                                                    <graphic>
+                                                        <MaterialDesignIconView glyphName="NUMERIC_2_BOX_OUTLINE" glyphSize="16" styleClass="icon" />
+                                                    </graphic>   
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="determineButton" onAction="#determine" text="Determine">
+                                                    <graphic>
+                                                        <MaterialDesignIconView glyphName="NUMERIC_3_BOX_OUTLINE" glyphSize="16" styleClass="icon" />
+                                                    </graphic>   
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Contact lens</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="placeLensStartToggleButton" onAction="#placeLensStart" text="Lens" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem label="Threshold">
+                                            <item>
+                                                <Spinner fx:id="lensThresholdFactorSpinner" editable="true" prefWidth="80.0">
+                                                    <valueFactory>
+                                                        <SpinnerValueFactory.DoubleSpinnerValueFactory min="0.2" max="2.0" initialValue="1.2" amountToStepBy="0.01"/>
+                                                    </valueFactory>
+                                                </Spinner>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Flood fill</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem label="Threshold">
+                                            <item>
+                                                <Spinner fx:id="thresholdFactorSpinner" editable="true" prefWidth="80.0">
+                                                    <valueFactory>
+                                                        <SpinnerValueFactory.DoubleSpinnerValueFactory min="0.2" max="2.0" initialValue="1.0" amountToStepBy="0.01"/>
+                                                    </valueFactory>
+                                                </Spinner>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="selectAnteriorChamberStartPointToggleButton" onAction="#selectAnteriorChamberStartPoint" text="Anterior chamber"/>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                        </ribbonGroups>
+                    </RibbonTab>
+                    <RibbonTab fx:id="cnnSegmentationTab" text="CNN segmentation">
+                        <ribbonGroups>
+                            <RibbonGroup fx:id="cnnRibbonGroup">
+                                <title>CNN</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="useAIToggleButton" text="Enable" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="gradientsButton" onAction="#gradients" text="Perform" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Slider fx:id="probabilitySlider" blockIncrement="0.01" max="0.99" min="0.0" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem label="Probability" >
+                                            <item>
+                                                <TextField fx:id="probabilityTextField" prefWidth="50.0" editable="false"  />
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup fx:id="cnnToolsRibbonGroup">
+                                <title>Ground truth</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="batchConvertMenuItem" onAction="#batchConvert" text="Image conversion" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="genGroundTruthImagesMenuItem" onAction="#genGroundTruthImages" text="Ground Truth" />
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                        </ribbonGroups>
+                    </RibbonTab>
+                    <RibbonTab text="Image">
+                        <ribbonGroups>
+                            <RibbonGroup>
+                                <title>Zoom</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="zoomInButton" onAction="#handleZoomIn" text="Zoom in">
+                                                    <graphic>
+                                                        <MaterialIconView glyphName="ZOOM_IN" glyphSize="16" styleClass="icon" />
+                                                    </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="zoomOutButton" onAction="#handleZoomOut" text="Zoom out">
+                                                    <graphic>
+                                                        <MaterialIconView glyphName="ZOOM_OUT" glyphSize="16" styleClass="icon" />
+                                                    </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="resetZoomButton" onAction="#handleResetZoom" text="Reset">
+                                                    <graphic>
+                                                        <MaterialIconView glyphName="ZOOM_OUT_MAP" glyphSize="16" styleClass="icon" />
+                                                    </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Brush</title>
+                                <nodes>
+                                    <Column>
+                                        <fx:define>
+                                            <ToggleGroup fx:id="brushToggleGroup" />
+                                        </fx:define>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="darkenToggleButton" selected="false" text="Darken" toggleGroup="$brushToggleGroup">
+                                                   <graphic>
+                                                        <FontAwesomeIconView glyphName="PAINT_BRUSH" glyphSize="16" styleClass="icon" />
+                                                   </graphic>
+                                                </ToggleButton>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <ToggleButton fx:id="brightenToggleButton" selected="false" text="Brighten" toggleGroup="$brushToggleGroup">
+                                                   <graphic>
+                                                       <FontAwesomeIconView fill="lightgrey" glyphName="PAINT_BRUSH" glyphSize="16" styleClass="icon" />
+                                                   </graphic>
+                                                </ToggleButton>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="clearAllBrushButton" onAction="#clearAllBrush" text="Clear all">
+                                                   <graphic>
+                                                       <MaterialIconView glyphName="CLEAR_ALL" glyphSize="16" styleClass="icon" />
+                                                   </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                    <Column>
+                                        <RibbonItem label="Radius">
+                                            <item>
+                                                <ComboBox fx:id="brushRadiusComboBox" minHeight="20" >
+                                                    <items>
+                                                        <FXCollections fx:factory="observableArrayList">
+                                                            <Integer fx:value="1" />
+                                                            <Integer fx:value="2" />
+                                                            <Integer fx:value="3" />
+                                                            <Integer fx:value="4" />
+                                                            <Integer fx:value="5" />
+                                                            <Integer fx:value="6" />
+                                                            <Integer fx:value="7" />
+                                                            <Integer fx:value="8" />
+                                                            <Integer fx:value="9" />
+                                                            <Integer fx:value="10" />
+                                                        </FXCollections>
+                                                    </items>
+                                                    <value>
+                                                        <Integer fx:value="8" />
+                                                    </value>
+                                                </ComboBox>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Contrast</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <Slider fx:id="contrastSlider" blockIncrement="1.0" max="255.0" min="-255.0" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem label="Contrast">
+                                            <item>
+                                                <TextField fx:id="contrastTextField" prefWidth="50.0" />
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Histogram</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="histogramButton" onAction="#showHistogram" text="Histogram">
+                                                    <graphic>
+                                                        <FontAwesomeIconView glyphName="BAR_CHART" glyphSize="16" styleClass="icon" />
+                                                    </graphic>   
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="stretchHistogramButton" onAction="#stretchHistogram" text="CLAHE">
+                                                    <graphic>
+                                                        <FontAwesomeIconView glyphName="BARCODE" glyphSize="16" styleClass="icon" />
+                                                    </graphic>   
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                        </ribbonGroups>
+                    </RibbonTab>
+                    <RibbonTab text="Tools">
+                        <ribbonGroups>
+                            <RibbonGroup>
+                                <title>Batch</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem label="Area">
+                                            <item>
+                                                <CheckBox fx:id="calculateAreaCheckbox" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem label="Profile">
+                                            <item>
+                                                <CheckBox fx:id="calculateProfileCheckbox" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button onAction="#batch" text="Run">
+                                                    <graphic>
+                                                        <MaterialIconView glyphName="DIRECTIONS_RUN" glyphSize="16" styleClass="icon" />
+                                                    </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button onAction="#reidentification" text="Reidentification">
+                                                    <graphic>
+                                                        <MaterialDesignIconView glyphName="SUNGLASSES" glyphSize="16" styleClass="icon" />
+                                                    </graphic>
+                                                </Button>
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                            <RibbonGroup>
+                                <title>Gradients</title>
+                                <nodes>
+                                    <Column>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="skeletonizeButton" onAction="#skeletonize" text="Skeletonize" />
+                                            </item>
+                                        </RibbonItem>
+                                        <RibbonItem>
+                                            <item>
+                                                <Button fx:id="clusterButton" onAction="#cluster" text="Cluster" />
+                                            </item>
+                                        </RibbonItem>
+                                    </Column>
+                                </nodes>
+                            </RibbonGroup>
+                        </ribbonGroups>
+                    </RibbonTab>
+                </tabs>
+            </Ribbon> 
+         </top>
+         <center>
+            <ScrollPane fitToHeight="true" fitToWidth="true" BorderPane.alignment="CENTER">
+               <content>
+                  <StackPane fx:id="scalePane">
+                     <children>
+                        <Canvas fx:id="imageCanvas" height="512.0" onMouseClicked="#handleMouseClickImageCanvas" onMouseEntered="#handleMouseEnter" onMouseExited="#handleMouseExit" onMousePressed="#handleMousePress" onMouseReleased="#handleMouseRelease" onScroll="#handleScroll" width="1280.0" BorderPane.alignment="CENTER" />
+                        <Canvas fx:id="gradientCanvas" height="512.0" onDragDetected="#handleDragDetect" onMouseDragged="#handleMouseDrag" onMouseEntered="#handleMouseEnter" onMouseExited="#handleMouseExit" onMousePressed="#handleMousePress" onMouseReleased="#handleMouseRelease" onScroll="#handleScroll" width="1280.0" />
+                        <Canvas fx:id="segmentationCanvas" height="512.0" onDragDetected="#handleDragDetect" onMouseDragged="#handleMouseDrag" onMouseEntered="#handleMouseEnter" onMouseExited="#handleMouseExit" onMousePressed="#handleMousePress" onMouseReleased="#handleMouseRelease" onScroll="#handleScroll" width="1280.0" />
+                        <Canvas fx:id="sliderCanvas" height="512.0" mouseTransparent="true" onDragDetected="#handleDragDetect" onMouseDragged="#handleMouseDrag" onMouseEntered="#handleMouseEnter" onMouseExited="#handleMouseExit" onMousePressed="#handleMousePress" onMouseReleased="#handleMouseRelease" onScroll="#handleScroll" width="1280.0" />
+                        <Canvas fx:id="poiCanvas" height="512.0" onDragDetected="#handleDragDetect" onMouseDragged="#handleMouseDrag" onMouseEntered="#handleMouseEnter" onMouseExited="#handleMouseExit" onMousePressed="#handleMousePress" onMouseReleased="#handleMouseRelease" onScroll="#handleScroll" width="1280.0" />
+                        <Canvas fx:id="caliperCanvas" height="512.0" onDragDetected="#handleDragDetect" onMouseDragged="#handleMouseDrag" onMouseEntered="#handleMouseEnter" onMouseExited="#handleMouseExit" onMousePressed="#handleMousePress" onMouseReleased="#handleMouseRelease" onScroll="#handleScroll" width="1280.0" />
+                        <Canvas fx:id="debugCanvas" height="512.0" layoutX="10.0" layoutY="10.0" onDragDetected="#handleDragDetect" onMouseDragged="#handleMouseDrag" onMouseEntered="#handleMouseEnter" onMouseExited="#handleMouseExit" onMousePressed="#handleMousePress" onMouseReleased="#handleMouseRelease" onScroll="#handleScroll" width="1280.0" />
+                        <Canvas fx:id="landmarksCanvas" height="512.0" onDragDetected="#handleDragDetect" onKeyPressed="#handleKeyPressLandmarkCanvas" onKeyReleased="#handleKeyReleaseLandmarkCanvas" onMouseClicked="#handleMouseClickLandmarkCanvas" onMouseDragged="#handleMouseDrag" onMouseEntered="#handleMouseEnterLandmarkCanvas" onMouseExited="#handleMouseExit" onMousePressed="#handleMousePress" onMouseReleased="#handleMouseRelease" onScroll="#handleScroll" width="1280.0">
+                           <StackPane.margin>
+                              <Insets />
+                           </StackPane.margin>
+                        </Canvas>
+                     </children>
+                  </StackPane>
+               </content>
+               <padding>
+                  <Insets bottom="20.0" />
+               </padding>
+            </ScrollPane>
+         </center>
+         <bottom>
+            <BorderPane>
+                <center>
+                    <Label fx:id="fileLabel" BorderPane.alignment="CENTER_LEFT">
+                       <padding>
+                          <Insets left="6.0" top="3.0" bottom="3.0" />
+                       </padding>
+                    </Label>
+                </center>
+                <right>
+                    <HBox BorderPane.alignment="CENTER_RIGHT" spacing="3" >
+                        <padding>
+                           <Insets right="6.0" top="3.0" bottom="3.0" />
+                        </padding>
+                        <Label text="Clipboard # "/> 
+                        <Label fx:id="resultNumberLabel" />
+                        <Separator orientation="VERTICAL" />
+                        <Label text="Threshold: "/> 
+                        <Label fx:id="thresholdLabel"/>
+                        <Separator orientation="VERTICAL" />
+                        <Label fx:id="zoomLabel">
+                            <graphic>
+                                <MaterialDesignIconView glyphName="MAGNIFY" glyphSize="16" />
+                            </graphic>
+                        </Label>
+                    </HBox>
+                </right>
+            </BorderPane>
+         </bottom>
+      </BorderPane>
+      <BorderPane fx:id="blockingPane" prefHeight="200.0" prefWidth="200.0" visible="false">
+         <center>
+            <ProgressIndicator fx:id="progressIndicator" maxHeight="300.0" visible="false" BorderPane.alignment="CENTER" />
+         </center>
+      </BorderPane>
+   </children>
+</StackPane>
